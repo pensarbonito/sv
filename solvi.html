@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Formulario Wizard - Solicitud de Viaje</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      background: #f1f1f1;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .form-wrapper {
+      background: white;
+      border-radius: 10px;
+      max-width: 800px;
+      width: 100%;
+      padding: 2.5rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      font-weight: bold;
+      color: #222;
+    }
+
+    .form-step {
+      display: none;
+    }
+
+    .form-step.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #fff;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+    }
+
+    .btn-next {
+      background: #000;
+      color: #fff;
+    }
+
+    .btn-prev {
+      background: #ccc;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+.btn-add {
+  display: inline-block;
+  margin: 1rem 0;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.itinerario-item {
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  background: #fafafa;
+}
+
+  </style>
+</head>
+<body>
+  <div class="form-wrapper">
+    <h2>Solicitud de Viaje</h2>
+    <form id="wizardForm">
+      <!-- PASO 1: DATOS DEL PROYECTO Y SOLICITANTE -->
+      <div class="form-step active" id="step-1">
+        <div class="form-group">
+          <label for="proyecto">Nombre del proyecto o actividad:</label>
+          <select id="proyecto" name="proyecto">
+            <option value="47 Salón Nacional de Artistas" selected>47 Salón Nacional de Artistas</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden" id="otroProyectoDiv">
+          <label for="otroProyecto">Especificar otro proyecto:</label>
+          <input type="text" id="otroProyecto" name="otroProyecto" />
+        </div>
+
+        <div class="form-group">
+          <label for="linea">Línea presupuestal:</label>
+          <select id="linea" name="linea">
+            <option value="">--Selecciona--</option>
+            <option value="Funcionamiento">Funcionamiento</option>
+            <option value="Inversión">Inversión</option>
+            <option value="Apoyo logístico">Apoyo logístico</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre">Nombre y Apellido:</label>
+          <input type="text" id="nombre" name="nombre" />
+        </div>
+
+        <div class="form-group">
+          <label for="tipo_doc">Tipo de documento:</label>
+          <select id="tipo_doc" name="tipo_doc">
+            <option value="">--Selecciona--</option>
+            <option value="Cédula de ciudadanía">Cédula de ciudadanía</option>
+            <option value="Pasaporte">Pasaporte</option>
+            <option value="Cédula extranjera">Cédula extranjera</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="documento">Número de documento:</label>
+          <input type="text" id="documento" name="documento" />
+        </div>
+
+        <div class="form-group">
+          <label for="celular">Celular:</label>
+          <input type="tel" id="celular" name="celular" />
+        </div>
+
+        <div class="form-group">
+          <label for="correo">Correo electrónico:</label>
+          <input type="email" id="correo" name="correo" />
+        </div>
+
+        <div class="btn-group">
+          <button type="button" class="btn btn-next" onclick="nextStep()">Siguiente →</button>
+        </div>
+      </div>
+
+      <!-- Aquí vendrán los pasos 2 a 5 -->
+<!-- PASO 2: ITINERARIO DEL VIAJE -->
+<div class="form-step" id="step-2">
+  <h3>Itinerario del viaje</h3>
+  <div id="itinerarioContainer"></div>
+  <button type="button" class="btn btn-add" onclick="agregarItinerario()">+ Agregar destino</button>
+
+  <div class="btn-group">
+    <button type="button" class="btn btn-prev" onclick="prevStep()">← Anterior</button>
+    <button type="button" class="btn btn-next" onclick="nextStep()">Siguiente →</button>
+  </div>
+</div>
+
+<!-- PASO 3: DESPLAZAMIENTO -->
+<div class="form-step" id="step-3">
+  <div class="form-group">
+    <label for="tipoDesplazamiento">Tipo de desplazamiento:</label>
+    <select id="tipoDesplazamiento" name="tipoDesplazamiento" onchange="mostrarCamposDesplazamiento()">
+      <option value="">--Selecciona--</option>
+      <option value="Aéreo">Aéreo</option>
+      <option value="Terrestre">Terrestre</option>
+      <option value="Fluvial">Fluvial</option>
+      <option value="Otro">Otro</option>
+    </select>
+  </div>
+
+  <!-- Desplazamiento AÉREO -->
+  <div id="desplazamientoAereo" class="hidden">
+    <div class="form-group">
+      <label>¿Requiere tiquete aéreo?</label>
+      <select id="aereoRequiere">
+        <option value="">--Selecciona--</option>
+        <option>Sí</option>
+        <option>No</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Fechas de viaje y ciudad de origen/destino (solo ida o ida y vuelta):</label>
+      <textarea id="aereoFechas"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Horario estimado (vuelo ida y regreso):</label>
+      <textarea id="aereoHorario"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>¿Requiere maleta?</label>
+      <select id="aereoMaleta">
+        <option value="">--Selecciona--</option>
+        <option>Sí - Cabina</option>
+        <option>Sí - Bodega</option>
+        <option>No</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Monto cotizado del tiquete:</label>
+      <input type="number" id="aereoMonto" />
+    </div>
+
+    <div class="form-group">
+      <label>¿Se entrega recurso al solicitante?</label>
+      <select id="aereoEntrega">
+        <option value="">--Selecciona--</option>
+        <option>Sí</option>
+        <option>No</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Motivo (si no se entrega recurso):</label>
+      <textarea id="aereoMotivo"></textarea>
+    </div>
+  </div>
+
+  <!-- Desplazamiento TERRESTRE / FLUVIAL / OTRO -->
+  <div id="desplazamientoOtro" class="hidden">
+    <div class="form-group">
+      <label>¿Requiere transporte?</label>
+      <select id="otroRequiere">
+        <option value="">--Selecciona--</option>
+        <option>Sí</option>
+        <option>No</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Especificar tipo: terrestre / fluvial / otro</label>
+      <input type="text" id="otroTipo" />
+    </div>
+
+    <div class="form-group">
+      <label>Itinerario de viajes:</label>
+      <textarea id="otroItinerario"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Monto cotizado total:</label>
+      <input type="number" id="otroMonto" />
+    </div>
+
+    <div class="form-group">
+      <label>¿Se entrega recurso al solicitante?</label>
+      <select id="otroEntrega">
+        <option value="">--Selecciona--</option>
+        <option>Sí</option>
+        <option>No</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Motivo (si no se entrega recurso):</label>
+      <textarea id="otroMotivo"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-group">
+    <button type="button" class="btn btn-prev" onclick="prevStep()">← Anterior</button>
+    <button type="button" class="btn btn-next" onclick="nextStep()">Siguiente →</button>
+  </div>
+</div>
+
+<!-- PASO 4: ALOJAMIENTO -->
+<div class="form-step" id="step-4">
+  <div class="form-group">
+    <label>¿Requiere alojamiento?</label>
+    <select id="alojamientoRequiere" onchange="mostrarCamposAlojamiento()">
+      <option value="">--Selecciona--</option>
+      <option>Sí</option>
+      <option>No</option>
+    </select>
+  </div>
+
+  <div id="alojamientoCampos" class="hidden">
+    <div class="form-group">
+      <label>Ubicación (Ciudad / Municipio / Vereda):</label>
+      <input type="text" id="alojamientoUbicacion" />
+    </div>
+
+    <div class="form-group">
+      <label>Nombre y contacto del alojamiento:</label>
+      <textarea id="alojamientoContacto"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Fecha de entrada:</label>
+      <input type="date" id="alojamientoEntrada" />
+    </div>
+
+    <div class="form-group">
+      <label>Fecha de salida:</label>
+      <input type="date" id="alojamientoSalida" />
+    </div>
+
+    <div class="form-group">
+      <label>Cantidad de noches:</label>
+      <input type="number" id="alojamientoNoches" />
+    </div>
+
+    <div class="form-group">
+      <label>Monto cotizado total:</label>
+      <input type="number" id="alojamientoMonto" />
+    </div>
+
+    <div class="form-group">
+      <label>¿Se entrega este recurso al solicitante?</label>
+      <select id="alojamientoEntrega">
+        <option value="">--Selecciona--</option>
+        <option>Sí</option>
+        <option>No</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Motivo (si no se entrega recurso):</label>
+      <textarea id="alojamientoMotivo"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-group">
+    <button type="button" class="btn btn-prev" onclick="prevStep()">← Anterior</button>
+    <button type="button" class="btn btn-next" onclick="nextStep()">Siguiente →</button>
+  </div>
+</div>
+
+<!-- PASO 5: GASTOS DE PARTICIPACIÓN Y ENVÍO -->
+<div class="form-step" id="step-5">
+  <div class="form-group">
+    <label>Cantidad de días del viaje:</label>
+    <input type="number" id="participacionDias" />
+  </div>
+
+  <div class="form-group">
+    <label>Valor total de viáticos (alimentación + transportes internos):</label>
+    <input type="number" id="participacionViaticos" />
+  </div>
+
+  <div class="form-group">
+    <label>¿Incluye transporte al aeropuerto?</label>
+    <select id="participacionAeropuertoSiNo">
+      <option value="">--Selecciona--</option>
+      <option>Sí</option>
+      <option>No</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>Valor transporte aeropuerto:</label>
+    <input type="number" id="participacionAeropuertoValor" />
+  </div>
+
+  <div class="btn-group">
+    <button type="button" class="btn btn-prev" onclick="prevStep()">← Anterior</button>
+    <button type="submit" class="btn btn-next">Enviar y Descargar →</button>
+  </div>
+</div>
+
+    </form>
+  </div>
+
+  <script>
+    let currentStep = 1;
+
+    function showStep(step) {
+      document.querySelectorAll('.form-step').forEach((el, i) => {
+        el.classList.toggle('active', i === step - 1);
+      });
+    }
+
+    function nextStep() {
+      currentStep++;
+      showStep(currentStep);
+    }
+
+    function prevStep() {
+      currentStep--;
+      showStep(currentStep);
+    }
+
+    // Mostrar campo "otro proyecto"
+    document.getElementById('proyecto').addEventListener('change', function() {
+      document.getElementById('otroProyectoDiv').classList.toggle('hidden', this.value !== 'Otro');
+    });
+
+    let itinerarioCount = 0;
+
+function agregarItinerario() {
+  itinerarioCount++;
+  const container = document.getElementById('itinerarioContainer');
+  const bloque = document.createElement('div');
+  bloque.className = 'itinerario-item';
+  bloque.innerHTML = `
+    <h4>Destino ${itinerarioCount}</h4>
+    <div class="form-group"><label>Fecha:</label><input type="date" id="fecha_${itinerarioCount}" /></div>
+    <div class="form-group"><label>Hora estimada:</label><input type="time" id="hora_${itinerarioCount}" /></div>
+    <div class="form-group"><label>Lugar:</label><input type="text" id="lugar_${itinerarioCount}" /></div>
+    <div class="form-group"><label>Tipo de transporte:</label>
+      <select id="transporte_${itinerarioCount}">
+        <option value="">--Selecciona--</option>
+        <option value="Terrestre">Terrestre</option>
+        <option value="Aéreo">Aéreo</option>
+        <option value="Fluvial">Fluvial</option>
+        <option value="Otro">Otro</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Agenda / Personas a visitar:</label>
+      <textarea id="agenda_${itinerarioCount}"></textarea>
+    </div>
+  `;
+  container.appendChild(bloque);
+}
+
+function mostrarCamposDesplazamiento() {
+  const tipo = document.getElementById('tipoDesplazamiento').value;
+  document.getElementById('desplazamientoAereo').classList.add('hidden');
+  document.getElementById('desplazamientoOtro').classList.add('hidden');
+
+  if (tipo === 'Aéreo') {
+    document.getElementById('desplazamientoAereo').classList.remove('hidden');
+  } else if (['Terrestre', 'Fluvial', 'Otro'].includes(tipo)) {
+    document.getElementById('desplazamientoOtro').classList.remove('hidden');
+  }
+}
+
+function mostrarCamposAlojamiento() {
+  const requiere = document.getElementById('alojamientoRequiere').value;
+  document.getElementById('alojamientoCampos').classList.toggle('hidden', requiere !== 'Sí');
+}
+  </script>
+</body>
+</html>
