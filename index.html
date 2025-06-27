@@ -2,15 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Proyección de Itinerario de Viaje</title>
+  <title>Proyección de Itinerario de Viajes 47SNA</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
     th, td { border: 1px solid #888; padding: 6px; text-align: center; }
     th { background: #eee; }
-    input[type="number"], input[type="text"], select {
-      width: 100%; box-sizing: border-box;
-    }
+    input, select { width: 100%; box-sizing: border-box; }
     button { margin: 5px; }
     .total { font-weight: bold; background: #e4f7e4; }
     .section-title { font-size: 18px; margin-top: 30px; border-bottom: 2px solid #333; padding-bottom: 5px; }
@@ -20,155 +18,292 @@
 
 <h1>Proyección de Itinerario de Viaje</h1>
 
+<script>
+  const perfiles = [
+    { nombre: "Ana Torres", cedula: "123456789", telefono: "3001234567", correo: "ana@example.com" },
+    { nombre: "Carlos Martínez", cedula: "234567890", telefono: "3012345678", correo: "carlos@example.com" },
+    { nombre: "Diana Pérez", cedula: "345678901", telefono: "3023456789", correo: "diana@example.com" },
+    { nombre: "Luis Fernández", cedula: "456789012", telefono: "3034567890", correo: "luis@example.com" },
+    { nombre: "María Cárdenas", cedula: "567890123", telefono: "3045678901", correo: "maria@example.com" },
+    { nombre: "Pedro Jiménez", cedula: "678901234", telefono: "3056789012", correo: "pedro@example.com" },
+    { nombre: "Laura Ramírez", cedula: "789012345", telefono: "3067890123", correo: "laura@example.com" },
+    { nombre: "Juan Soto", cedula: "890123456", telefono: "3078901234", correo: "juan@example.com" },
+    { nombre: "Natalia López", cedula: "901234567", telefono: "3089012345", correo: "natalia@example.com" },
+    { nombre: "Andrés Mejía", cedula: "012345678", telefono: "3090123456", correo: "andres@example.com" }
+  ];
+
+  const ciudades = [
+    "Armenia", "Barranquilla", "Bogotá", "Bucaramanga", "Cali", "Cartagena",
+    "Cúcuta", "Ibagué", "Manizales", "Medellín", "Montería", "Neiva",
+    "Pereira", "Popayán", "Riohacha", "San Andrés", "Santa Marta", "Sincelejo",
+    "Tunja", "Valledupar", "Villavicencio"
+  ];
+
+  function generarOpcionesCiudad() {
+    return ciudades.map(c => `<option value="${c}">${c}</option>`).join("");
+  }
+
+  function cargarPerfil(select) {
+    const idx = select.value;
+    if (idx === "") return;
+    const p = perfiles[idx];
+    document.getElementById("nombre").value = p.nombre;
+    document.getElementById("cedula").value = p.cedula;
+    document.getElementById("telefono").value = p.telefono;
+    document.getElementById("correo").value = p.correo;
+  }
+
+  function formatCOP(value) {
+    return "$" + value.toLocaleString("es-CO");
+  }
+
+  function calcularTotales() {
+    let totalTransporte = 0;
+    document.querySelectorAll("#transporte tbody tr").forEach(row => {
+      const valor = Number(row.cells[3].querySelector("input").value) || 0;
+      const trayectos = Number(row.cells[4].querySelector("input").value) || 0;
+      const subtotal = valor * trayectos;
+      row.cells[5].textContent = formatCOP(subtotal);
+      totalTransporte += subtotal;
+    });
+    document.getElementById("totalTransporte").textContent = formatCOP(totalTransporte);
+
+    let totalAlojamiento = 0;
+    document.querySelectorAll("#alojamiento tbody tr").forEach(row => {
+      const noches = Number(row.cells[1].querySelector("input").value) || 0;
+      const valorNoche = Number(row.cells[2].querySelector("input").value) || 0;
+      const subtotal = noches * valorNoche;
+      row.cells[3].textContent = formatCOP(subtotal);
+      totalAlojamiento += subtotal;
+    });
+    document.getElementById("totalAlojamiento").textContent = formatCOP(totalAlojamiento);
+
+    let totalViaticos = 0;
+    document.querySelectorAll("#viaticos tbody tr").forEach(row => {
+      const dias = Number(row.cells[1].querySelector("input").value) || 0;
+      const viaticoDia = Number(row.cells[2].querySelector("input").value) || 0;
+      const transporteLocal = Number(row.cells[3].querySelector("input").value) || 0;
+      const subtotal = (dias * viaticoDia) + transporteLocal;
+      row.cells[4].textContent = formatCOP(subtotal);
+      totalViaticos += subtotal;
+    });
+    document.getElementById("totalViaticos").textContent = formatCOP(totalViaticos);
+
+    const totalGeneral = totalTransporte + totalAlojamiento + totalViaticos;
+    document.getElementById("totalGeneral").textContent = formatCOP(totalGeneral);
+  }
+
+  document.addEventListener("input", function(e) {
+    if (e.target.matches("input[type='number']")) calcularTotales();
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("select.ciudad").forEach(select => {
+      select.innerHTML = generarOpcionesCiudad();
+    });
+  });
+
+  function eliminarFila(btn) {
+    const row = btn.closest("tr");
+    row.remove();
+    calcularTotales();
+  }
+
+  function agregarFila(tablaId) {
+    const tabla = document.getElementById(tablaId).querySelector("tbody");
+    let nuevaFila = document.createElement("tr");
+    if (tablaId === "transporte") {
+      nuevaFila.innerHTML = `
+        <td><select class='ciudad'>${generarOpcionesCiudad()}</select></td>
+        <td><select class='ciudad'>${generarOpcionesCiudad()}</select></td>
+        <td><select><option>Aéreo</option><option>Terrestre</option><option>Fluvial</option><option>Otro</option></select></td>
+        <td><input type='number' value='0'></td>
+        <td><input type='number' value='1'></td>
+        <td>$0</td>
+        <td><button onclick="eliminarFila(this)">Eliminar</button></td>`;
+    } else if (tablaId === "alojamiento") {
+      nuevaFila.innerHTML = `
+        <td><select class='ciudad'>${generarOpcionesCiudad()}</select></td>
+        <td><input type='number' value='0'></td>
+        <td><input type='number' value='0'></td>
+        <td>$0</td>
+        <td><button onclick="eliminarFila(this)">Eliminar</button></td>`;
+    } else if (tablaId === "viaticos") {
+      nuevaFila.innerHTML = `
+        <td><select class='ciudad'>${generarOpcionesCiudad()}</select></td>
+        <td><input type='number' value='0'></td>
+        <td><input type='number' value='0'></td>
+        <td><input type='number' value='0'></td>
+        <td>$0</td>
+        <td><button onclick="eliminarFila(this)">Eliminar</button></td>`;
+    }
+    tabla.appendChild(nuevaFila);
+  }
+
+  function exportCSV() {
+    let csv = "Información General\n";
+    csv += "Nombre,Cédula,Teléfono,Correo,Proyecto,Motivo de viaje\n";
+    csv += [
+      document.getElementById("nombre").value,
+      document.getElementById("cedula").value,
+      document.getElementById("telefono").value,
+      document.getElementById("correo").value,
+      document.getElementById("proyecto").value,
+      document.getElementById("motivo").value
+    ].join(",") + "\n\n";
+
+    // Transporte
+    csv += "Transporte\n";
+    csv += "Origen,Destino,Medio,Valor Unitario,# Trayectos,Subtotal\n";
+    document.querySelectorAll("#transporte tbody tr").forEach(row => {
+      const cells = row.querySelectorAll("td");
+      const values = [
+        cells[0].querySelector("select").value,
+        cells[1].querySelector("select").value,
+        cells[2].querySelector("select").value,
+        cells[3].querySelector("input").value,
+        cells[4].querySelector("input").value,
+        cells[5].textContent
+      ];
+      csv += values.join(",") + "\n";
+    });
+
+    // Alojamiento
+    csv += "\nAlojamiento\n";
+    csv += "Ciudad,Noches,Valor por noche,Subtotal\n";
+    document.querySelectorAll("#alojamiento tbody tr").forEach(row => {
+      const cells = row.querySelectorAll("td");
+      const values = [
+        cells[0].querySelector("select").value,
+        cells[1].querySelector("input").value,
+        cells[2].querySelector("input").value,
+        cells[3].textContent
+      ];
+      csv += values.join(",") + "\n";
+    });
+
+    // Viáticos
+    csv += "\nViáticos\n";
+    csv += "Ciudad,Días,Viáticos por día,Transporte local,Subtotal\n";
+    document.querySelectorAll("#viaticos tbody tr").forEach(row => {
+      const cells = row.querySelectorAll("td");
+      const values = [
+        cells[0].querySelector("select").value,
+        cells[1].querySelector("input").value,
+        cells[2].querySelector("input").value,
+        cells[3].querySelector("input").value,
+        cells[4].textContent
+      ];
+      csv += values.join(",") + "\n";
+    });
+
+    // Totales
+    csv += "\nTotales\n";
+    csv += `Transporte,${document.getElementById("totalTransporte").textContent}\n`;
+    csv += `Alojamiento,${document.getElementById("totalAlojamiento").textContent}\n`;
+    csv += `Viáticos,${document.getElementById("totalViaticos").textContent}\n`;
+    csv += `Total General,${document.getElementById("totalGeneral").textContent}\n`;
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.setAttribute("href", URL.createObjectURL(blob));
+    link.setAttribute("download", "itinerario_viaje.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+</script>
+
+<!-- Aquí va el contenido del formulario que será renderizado -->
+
+
+<!-- Información General -->
 <div class="section-title">1. Información General</div>
 <p>
-  Nombre: <input type="text" id="nombre" style="width: 300px;">
-  Proyecto: <input type="text" id="proyecto" style="width: 300px;">
+  Perfil:
+  <select id="perfil" onchange="cargarPerfil(this)">
+    <option value="">-- Selecciona un perfil --</option>
+    <option value="0">Ana Torres</option>
+    <option value="1">Carlos Martínez</option>
+    <option value="2">Diana Pérez</option>
+    <option value="3">Luis Fernández</option>
+    <option value="4">María Cárdenas</option>
+    <option value="5">Pedro Jiménez</option>
+    <option value="6">Laura Ramírez</option>
+    <option value="7">Juan Soto</option>
+    <option value="8">Natalia López</option>
+    <option value="9">Andrés Mejía</option>
+  </select>
+</p>
+<p>
+  Nombre: <input type="text" id="nombre">
+  Cédula: <input type="text" id="cedula">
+  Teléfono: <input type="text" id="telefono">
+  Correo: <input type="text" id="correo">
+</p>
+<p>
+  Proyecto:
+  <select id="proyecto">
+    <option>Residencia Artística Rural</option>
+    <option>Encuentro Nacional de Saberes</option>
+    <option>Laboratorio de Creación Comunitaria</option>
+  </select>
+  Motivo de viaje:
+  <select id="motivo">
+    <option>Participación en evento</option>
+    <option>Investigación de campo</option>
+    <option>Coordinación logística</option>
+  </select>
 </p>
 
+<!-- Transporte -->
 <div class="section-title">2. Transporte</div>
 <table id="transporte">
   <thead>
     <tr>
-      <th>Origen</th><th>Destino</th><th>Medio</th><th>Valor Unitario</th><th># Trayectos</th><th>Subtotal</th><th>Acción</th>
+      <th>Origen</th><th>Destino</th><th>Medio</th>
+      <th>Valor Unitario</th><th># Trayectos</th><th>Subtotal</th><th></th>
     </tr>
   </thead>
   <tbody></tbody>
 </table>
-<button onclick="addRow('transporte')">➕ Agregar fila</button>
+<button onclick="agregarFila('transporte')">Agregar Transporte</button>
 
+<!-- Alojamiento -->
 <div class="section-title">3. Alojamiento</div>
 <table id="alojamiento">
   <thead>
     <tr>
-      <th>Ciudad</th><th>Noches</th><th>Valor por noche</th><th>Subtotal</th><th>Acción</th>
+      <th>Ciudad</th><th>Noches</th><th>Valor por noche</th><th>Subtotal</th><th></th>
     </tr>
   </thead>
   <tbody></tbody>
 </table>
-<button onclick="addRow('alojamiento')">➕ Agregar fila</button>
+<button onclick="agregarFila('alojamiento')">Agregar Alojamiento</button>
 
+<!-- Viáticos -->
 <div class="section-title">4. Viáticos</div>
 <table id="viaticos">
   <thead>
     <tr>
-      <th>Ciudad</th><th>Días</th><th>Viáticos por día</th><th>Transporte local</th><th>Subtotal</th><th>Acción</th>
+      <th>Ciudad</th><th>Días</th><th>Viáticos por día</th>
+      <th>Transporte local</th><th>Subtotal</th><th></th>
     </tr>
   </thead>
   <tbody></tbody>
 </table>
-<button onclick="addRow('viaticos')">➕ Agregar fila</button>
+<button onclick="agregarFila('viaticos')">Agregar Viáticos</button>
 
+<!-- Totales -->
 <div class="section-title">5. Totales</div>
 <table>
-  <tr><th>Transporte</th><td id="totalTransporte" class="total">$0</td></tr>
-  <tr><th>Alojamiento</th><td id="totalAlojamiento" class="total">$0</td></tr>
-  <tr><th>Viáticos</th><td id="totalViaticos" class="total">$0</td></tr>
-  <tr><th>Total General</th><td id="totalGeneral" class="total">$0</td></tr>
+  <tr><th>Transporte</th><td id="totalTransporte">$0</td></tr>
+  <tr><th>Alojamiento</th><td id="totalAlojamiento">$0</td></tr>
+  <tr><th>Viáticos</th><td id="totalViaticos">$0</td></tr>
+  <tr><th class="total">Total General</th><td class="total" id="totalGeneral">$0</td></tr>
 </table>
 
-<button onclick="exportCSV()">📁 Exportar CSV</button>
-
-<script>
-  function formatCOP(val) {
-    return "$" + (val || 0).toLocaleString("es-CO");
-  }
-
-  function calcAll() {
-    calc('transporte', 3, 4, 5, 'totalTransporte');
-    calc('alojamiento', 1, 2, 3, 'totalAlojamiento');
-    calc('viaticos', 1, 2, 4, 'totalViaticos', 3);
-    const t = getValue('totalTransporte'), a = getValue('totalAlojamiento'), v = getValue('totalViaticos');
-    document.getElementById('totalGeneral').innerText = formatCOP(t + a + v);
-  }
-
-  function calc(tableId, valIdx, qtyIdx, subtIdx, totalId, extraIdx = null) {
-    let rows = document.querySelectorAll(`#${tableId} tbody tr`);
-    let total = 0;
-    rows.forEach(row => {
-      let val = +row.children[valIdx].children[0].value || 0;
-      let qty = +row.children[qtyIdx].children[0].value || 0;
-      let extra = extraIdx !== null ? +row.children[extraIdx].children[0].value || 0 : 0;
-      let subt = (val * qty) + extra;
-      row.children[subtIdx].innerText = formatCOP(subt);
-      total += subt;
-    });
-    document.getElementById(totalId).innerText = formatCOP(total);
-  }
-
-  function getValue(id) {
-    return +(document.getElementById(id).innerText.replace(/[^\d]/g, '')) || 0;
-  }
-
-  function addRow(tableId) {
-    let table = document.querySelector(`#${tableId} tbody`);
-    let row = document.createElement('tr');
-
-    if (tableId === 'transporte') {
-      row.innerHTML = `
-        <td><input type="text"></td>
-        <td><input type="text"></td>
-        <td><select><option>Aéreo</option><option>Terrestre</option><option>Fluvial</option><option>Otro</option></select></td>
-        <td><input type="number" value="0" oninput="calcAll()"></td>
-        <td><input type="number" value="1" oninput="calcAll()"></td>
-        <td>$0</td>
-        <td><button onclick="this.parentNode.parentNode.remove(); calcAll()">🗑</button></td>
-      `;
-    } else if (tableId === 'alojamiento') {
-      row.innerHTML = `
-        <td><input type="text"></td>
-        <td><input type="number" value="0" oninput="calcAll()"></td>
-        <td><input type="number" value="0" oninput="calcAll()"></td>
-        <td>$0</td>
-        <td><button onclick="this.parentNode.parentNode.remove(); calcAll()">🗑</button></td>
-      `;
-    } else if (tableId === 'viaticos') {
-      row.innerHTML = `
-        <td><input type="text"></td>
-        <td><input type="number" value="0" oninput="calcAll()"></td>
-        <td><input type="number" value="0" oninput="calcAll()"></td>
-        <td><input type="number" value="0" oninput="calcAll()"></td>
-        <td>$0</td>
-        <td><button onclick="this.parentNode.parentNode.remove(); calcAll()">🗑</button></td>
-      `;
-    }
-    table.appendChild(row);
-    calcAll();
-  }
-
-  function exportCSV() {
-    let csv = [];
-    csv.push(`Nombre:,${document.getElementById("nombre").value}`);
-    csv.push(`Proyecto:,${document.getElementById("proyecto").value}`);
-    csv.push("\nSECCIÓN,ORIGEN/CIUDAD,DESTINO/NOCHES,DÍAS/MEDIO,VALOR UNIT,TRAYECTOS/NOCHES,OTROS,Subtotal");
-
-    const tables = ['transporte', 'alojamiento', 'viaticos'];
-    tables.forEach(id => {
-      document.querySelectorAll(`#${id} tbody tr`).forEach(row => {
-        let data = Array.from(row.querySelectorAll("input, select")).map(el => el.value || "");
-        let subtotal = row.children[row.children.length - 2].innerText;
-        csv.push([id.toUpperCase()].concat(data).concat(subtotal).join(","));
-      });
-    });
-
-    csv.push("\n,TOTALES,,,," +
-      document.getElementById("totalTransporte").innerText + "," +
-      document.getElementById("totalAlojamiento").innerText + "," +
-      document.getElementById("totalViaticos").innerText + "," +
-      document.getElementById("totalGeneral").innerText);
-
-    let blob = new Blob([csv.join("\n")], { type: 'text/csv;charset=utf-8;' });
-    let link = document.createElement("a");
-    link.setAttribute("href", URL.createObjectURL(blob));
-    link.setAttribute("download", "itinerario_viaje.csv");
-    link.click();
-  }
-
-  // Inicializa con una fila en cada tabla
-  addRow('transporte');
-  addRow('alojamiento');
-  addRow('viaticos');
-</script>
+<button onclick="exportCSV()">Exportar CSV</button>
 
 </body>
 </html>
