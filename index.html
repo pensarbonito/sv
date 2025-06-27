@@ -2,372 +2,173 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Información para gestión de viajes y alojamiento</title>
+  <title>Proyección de Itinerario de Viaje</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
-    .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h2 { text-align: center; margin-bottom: 20px; }
-    .form-step { display: none; }
-    .form-step.active { display: block; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; }
-    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-    .btn-group { display: flex; justify-content: space-between; margin-top: 20px; }
-    button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-    .btn-prev { background: #ccc; }
-    .btn-next, .btn-submit { background: #007BFF; color: #fff; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th, td { border: 1px solid #888; padding: 6px; text-align: center; }
+    th { background: #eee; }
+    input[type="number"], input[type="text"], select {
+      width: 100%; box-sizing: border-box;
+    }
+    button { margin: 5px; }
+    .total { font-weight: bold; background: #e4f7e4; }
+    .section-title { font-size: 18px; margin-top: 30px; border-bottom: 2px solid #333; padding-bottom: 5px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Información para gestión de viajes y alojamiento</h2>
-    <form id="wizardForm">
-      <!-- Sección 1: Datos del solicitante -->
-<div class="form-step active">
-  <h3>1. Datos del solicitante</h3>
-  <div class="form-group">
-    <label for="proyecto">Nombre del proyecto o actividad</label>
-    <select id="proyecto" name="proyecto">
-      <option value="47 Salón Nacional de Artistas">47 Salón Nacional de Artistas</option>
-      <option value="Otro">Otro</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="linea">Línea presupuestal</label>
-    <select id="linea" name="linea">
-      <option value="Componente curatorial 47 SNA">Componente curatorial 47 SNA</option>
-      <option value="Otro1">Otro</option>
-      <option value="Otro2">Otro</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="nombre">Nombre y apellido</label>
-    <select id="nombre" name="nombre" onchange="cargarDatosPersona()">
-      <option value="">Seleccione...</option>
-      <option value="persona1">Ana Torres</option>
-      <option value="persona2">Carlos Rojas</option>
-      <option value="persona3">María López</option>
-      <option value="persona4">Luis González</option>
-      <option value="persona5">Claudia Méndez</option>
-      <option value="persona6">Jorge Díaz</option>
-      <option value="persona7">Sofía Ramírez</option>
-      <option value="persona8">Pedro Salazar</option>
-      <option value="persona9">Laura Herrera</option>
-      <option value="persona10">Andrés Castillo</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="documento">Documento de identidad</label>
-    <input type="text" id="documento" name="documento">
-  </div>
-  <div class="form-group">
-    <label for="celular">Celular</label>
-    <input type="text" id="celular" name="celular">
-  </div>
-  <div class="form-group">
-    <label for="correo">Correo electrónico</label>
-    <input type="email" id="correo" name="correo">
-  </div>
-  <div class="form-group">
-    <label for="motivo">Motivo de viaje</label>
-    <select id="motivo" name="motivo">
-      <option value="Preproducción">Preproducción</option>
-      <option value="Producción">Producción</option>
-      <option value="Posproducción">Posproducción</option>
-    </select>
-  </div>
-  <div class="btn-group">
-    <button type="button" class="btn-next" onclick="nextStep()">Siguiente</button>
-  </div>
-</div>
 
-      <!-- Sección 2: Itinerario de viaje -->
-<div class="form-step">
-  <h3>2. Itinerario de viaje</h3>
-  <div id="viajesContainer"></div>
-  <button type="button" onclick="agregarViaje()">Agregar viaje</button>
-  <button type="button" onclick="eliminarViaje()">Eliminar último viaje</button>
-  <div class="btn-group">
-    <button type="button" class="btn-prev" onclick="prevStep()">Anterior</button>
-    <button type="button" class="btn-next" onclick="nextStep()">Siguiente</button>
-  </div>
-</div>
+<h1>Proyección de Itinerario de Viaje</h1>
 
-      <!-- Sección 3: Desplazamiento -->
-      <div class="form-step">
-        <h3>3. Desplazamiento</h3>
-        <div class="form-group">
-          <label for="tipoDesplazamiento">Tipo de desplazamiento</label>
-          <select id="tipoDesplazamiento" name="tipoDesplazamiento" onchange="mostrarDesplazamiento()">
-            <option value="">Seleccione...</option>
-            <option value="aereo">Aéreo</option>
-            <option value="otro">Terrestre, fluvial, otros</option>
-          </select>
-        </div>
-        <div id="aereoCampos" style="display: none">
-          <div class="form-group">
-            <label>Fechas de viaje y ciudad de origen/destino</label>
-            <textarea name="aereoFechas"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Horario estimado (ida y regreso)</label>
-            <textarea name="aereoHorario"></textarea>
-          </div>
-          <div class="form-group">
-            <label>¿Requiere maleta?</label>
-            <select name="aereoMaleta">
-              <option value="no">No</option>
-              <option value="cabina">Sí - Cabina</option>
-              <option value="bodega">Sí - Bodega</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Monto cotizado del tiquete</label>
-            <input type="number" name="aereoMonto">
-          </div>
-          <div class="form-group">
-            <label>¿Se entrega recurso al solicitante?</label>
-            <select name="aereoRecurso">
-              <option value="si">Sí</option>
-              <option value="no">No</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Motivo</label>
-            <textarea name="aereoMotivo"></textarea>
-          </div>
-        </div>
-        <div id="otroCampos" style="display: none">
-          <div class="form-group">
-            <label>Itinerario de viajes terrestres y fluviales</label>
-            <textarea name="otroItinerario"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Monto cotizado</label>
-            <input type="number" name="otroMonto">
-          </div>
-          <div class="form-group">
-            <label>¿Se entrega recurso al solicitante?</label>
-            <select name="otroRecurso">
-              <option value="si">Sí</option>
-              <option value="no">No</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Motivo</label>
-            <textarea name="otroMotivo"></textarea>
-          </div>
-        </div>
-        <div class="btn-group">
-          <button type="button" class="btn-prev" onclick="prevStep()">Anterior</button>
-          <button type="button" class="btn-next" onclick="nextStep()">Siguiente</button>
-        </div>
-      </div>
+<div class="section-title">1. Información General</div>
+<p>
+  Nombre: <input type="text" id="nombre" style="width: 300px;">
+  Proyecto: <input type="text" id="proyecto" style="width: 300px;">
+</p>
 
-      <!-- Sección 4: Alojamiento -->
-      <div class="form-step">
-        <h3>4. Alojamiento</h3>
-        <div class="form-group">
-          <label>Ciudad / Municipio / Vereda</label>
-          <select name="ubicacionAlojamiento">
-            <option value="Pasto">Pasto</option>
-            <option value="Popayan">Popayán</option>
-            <option value="Bogotá">Bogotá</option>
-            <option value="Cali">Cali</option>
-            <option value="El Tuno">El Tuno</option>
-            <option value="Purace">Puracé</option>
-            <option value="Medellin">Medellín</option>
-            <option value="Cartagena">Cartagena</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Nombre y contacto del alojamiento</label>
-          <textarea name="contactoAlojamiento"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Fecha de entrada</label>
-          <input type="date" name="entradaAlojamiento">
-        </div>
-        <div class="form-group">
-          <label>Fecha de salida</label>
-          <input type="date" name="salidaAlojamiento">
-        </div>
-        <div class="form-group">
-          <label>Cantidad de noches</label>
-          <input type="number" name="nochesAlojamiento">
-        </div>
-        <div class="form-group">
-          <label>Monto cotizado total del alojamiento</label>
-          <input type="number" name="montoAlojamiento">
-        </div>
-        <div class="form-group">
-          <label>¿Se entrega este recurso al solicitante?</label>
-          <select name="recursoAlojamiento">
-            <option value="si">Sí</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Motivo</label>
-          <textarea name="motivoAlojamiento"></textarea>
-        </div>
-        <div class="btn-group">
-          <button type="button" class="btn-prev" onclick="prevStep()">Anterior</button>
-          <button type="button" class="btn-next" onclick="nextStep()">Siguiente</button>
-        </div>
-      </div>
+<div class="section-title">2. Transporte</div>
+<table id="transporte">
+  <thead>
+    <tr>
+      <th>Origen</th><th>Destino</th><th>Medio</th><th>Valor Unitario</th><th># Trayectos</th><th>Subtotal</th><th>Acción</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+<button onclick="addRow('transporte')">➕ Agregar fila</button>
 
-      <!-- Sección 5: Gastos de participación -->
-      <div class="form-step">
-        <h3>5. Gastos de participación</h3>
-        <div class="form-group">
-          <label>Cantidad de días del viaje (viáticos: alimentación y transportes internos)</label>
-          <input type="number" name="diasViaticos">
-        </div>
-        <div class="form-group">
-          <label>Valor viáticos</label>
-          <input type="number" name="valorViaticos">
-        </div>
-        <div class="form-group">
-          <label>¿Transporte aeropuerto?</label>
-          <select name="transporteAeropuerto">
-            <option value="si">Sí</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Valor transporte aeropuerto</label>
-          <input type="number" name="valorAeropuerto">
-        </div>
-        <div class="btn-group">
-          <button type="button" class="btn-prev" onclick="prevStep()">Anterior</button>
-        </div>
-      </div>
-    </form>
-    <div style="text-align:center; margin-top: 20px;">
-      <button onclick="validarYExportarCSV()" class="btn-submit">Exportar CSV</button>
-    </div>
-  </div>
+<div class="section-title">3. Alojamiento</div>
+<table id="alojamiento">
+  <thead>
+    <tr>
+      <th>Ciudad</th><th>Noches</th><th>Valor por noche</th><th>Subtotal</th><th>Acción</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+<button onclick="addRow('alojamiento')">➕ Agregar fila</button>
+
+<div class="section-title">4. Viáticos</div>
+<table id="viaticos">
+  <thead>
+    <tr>
+      <th>Ciudad</th><th>Días</th><th>Viáticos por día</th><th>Transporte local</th><th>Subtotal</th><th>Acción</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+<button onclick="addRow('viaticos')">➕ Agregar fila</button>
+
+<div class="section-title">5. Totales</div>
+<table>
+  <tr><th>Transporte</th><td id="totalTransporte" class="total">$0</td></tr>
+  <tr><th>Alojamiento</th><td id="totalAlojamiento" class="total">$0</td></tr>
+  <tr><th>Viáticos</th><td id="totalViaticos" class="total">$0</td></tr>
+  <tr><th>Total General</th><td id="totalGeneral" class="total">$0</td></tr>
+</table>
+
+<button onclick="exportCSV()">📁 Exportar CSV</button>
+
 <script>
-  let currentStep = 0;
-  const steps = document.querySelectorAll('.form-step');
-
-  function showStep(index) {
-    steps.forEach((step, i) => step.classList.toggle('active', i === index));
+  function formatCOP(val) {
+    return "$" + (val || 0).toLocaleString("es-CO");
   }
 
-  function nextStep() {
-    if (currentStep < steps.length - 1) {
-      currentStep++;
-      showStep(currentStep);
+  function calcAll() {
+    calc('transporte', 3, 4, 5, 'totalTransporte');
+    calc('alojamiento', 1, 2, 3, 'totalAlojamiento');
+    calc('viaticos', 1, 2, 4, 'totalViaticos', 3);
+    const t = getValue('totalTransporte'), a = getValue('totalAlojamiento'), v = getValue('totalViaticos');
+    document.getElementById('totalGeneral').innerText = formatCOP(t + a + v);
+  }
+
+  function calc(tableId, valIdx, qtyIdx, subtIdx, totalId, extraIdx = null) {
+    let rows = document.querySelectorAll(`#${tableId} tbody tr`);
+    let total = 0;
+    rows.forEach(row => {
+      let val = +row.children[valIdx].children[0].value || 0;
+      let qty = +row.children[qtyIdx].children[0].value || 0;
+      let extra = extraIdx !== null ? +row.children[extraIdx].children[0].value || 0 : 0;
+      let subt = (val * qty) + extra;
+      row.children[subtIdx].innerText = formatCOP(subt);
+      total += subt;
+    });
+    document.getElementById(totalId).innerText = formatCOP(total);
+  }
+
+  function getValue(id) {
+    return +(document.getElementById(id).innerText.replace(/[^\d]/g, '')) || 0;
+  }
+
+  function addRow(tableId) {
+    let table = document.querySelector(`#${tableId} tbody`);
+    let row = document.createElement('tr');
+
+    if (tableId === 'transporte') {
+      row.innerHTML = `
+        <td><input type="text"></td>
+        <td><input type="text"></td>
+        <td><select><option>Aéreo</option><option>Terrestre</option><option>Fluvial</option><option>Otro</option></select></td>
+        <td><input type="number" value="0" oninput="calcAll()"></td>
+        <td><input type="number" value="1" oninput="calcAll()"></td>
+        <td>$0</td>
+        <td><button onclick="this.parentNode.parentNode.remove(); calcAll()">🗑</button></td>
+      `;
+    } else if (tableId === 'alojamiento') {
+      row.innerHTML = `
+        <td><input type="text"></td>
+        <td><input type="number" value="0" oninput="calcAll()"></td>
+        <td><input type="number" value="0" oninput="calcAll()"></td>
+        <td>$0</td>
+        <td><button onclick="this.parentNode.parentNode.remove(); calcAll()">🗑</button></td>
+      `;
+    } else if (tableId === 'viaticos') {
+      row.innerHTML = `
+        <td><input type="text"></td>
+        <td><input type="number" value="0" oninput="calcAll()"></td>
+        <td><input type="number" value="0" oninput="calcAll()"></td>
+        <td><input type="number" value="0" oninput="calcAll()"></td>
+        <td>$0</td>
+        <td><button onclick="this.parentNode.parentNode.remove(); calcAll()">🗑</button></td>
+      `;
     }
+    table.appendChild(row);
+    calcAll();
   }
 
-  function prevStep() {
-    if (currentStep > 0) {
-      currentStep--;
-      showStep(currentStep);
-    }
-  }
+  function exportCSV() {
+    let csv = [];
+    csv.push(`Nombre:,${document.getElementById("nombre").value}`);
+    csv.push(`Proyecto:,${document.getElementById("proyecto").value}`);
+    csv.push("\nSECCIÓN,ORIGEN/CIUDAD,DESTINO/NOCHES,DÍAS/MEDIO,VALOR UNIT,TRAYECTOS/NOCHES,OTROS,Subtotal");
 
-  const datosPersonas = {
-    persona1: { documento: '123456789', celular: '3001112233', correo: 'ana@example.com' },
-    persona2: { documento: '987654321', celular: '3011112233', correo: 'carlos@example.com' },
-    persona3: { documento: '135791357', celular: '3021112233', correo: 'maria@example.com' },
-    persona4: { documento: '246824682', celular: '3031112233', correo: 'luis@example.com' },
-    persona5: { documento: '123123123', celular: '3041112233', correo: 'claudia@example.com' },
-    persona6: { documento: '321321321', celular: '3051112233', correo: 'jorge@example.com' },
-    persona7: { documento: '456456456', celular: '3061112233', correo: 'sofia@example.com' },
-    persona8: { documento: '789789789', celular: '3071112233', correo: 'pedro@example.com' },
-    persona9: { documento: '111222333', celular: '3081112233', correo: 'laura@example.com' },
-    persona10: { documento: '999888777', celular: '3091112233', correo: 'andres@example.com' }
-  };
+    const tables = ['transporte', 'alojamiento', 'viaticos'];
+    tables.forEach(id => {
+      document.querySelectorAll(`#${id} tbody tr`).forEach(row => {
+        let data = Array.from(row.querySelectorAll("input, select")).map(el => el.value || "");
+        let subtotal = row.children[row.children.length - 2].innerText;
+        csv.push([id.toUpperCase()].concat(data).concat(subtotal).join(","));
+      });
+    });
 
-  function cargarDatosPersona() {
-    const select = document.getElementById('nombre');
-    const datos = datosPersonas[select.value];
-    document.getElementById('documento').value = datos ? datos.documento : '';
-    document.getElementById('celular').value = datos ? datos.celular : '';
-    document.getElementById('correo').value = datos ? datos.correo : '';
-  }
+    csv.push("\n,TOTALES,,,," +
+      document.getElementById("totalTransporte").innerText + "," +
+      document.getElementById("totalAlojamiento").innerText + "," +
+      document.getElementById("totalViaticos").innerText + "," +
+      document.getElementById("totalGeneral").innerText);
 
-  function mostrarDesplazamiento() {
-    const tipo = document.getElementById('tipoDesplazamiento').value;
-    document.getElementById('aereoCampos').style.display = (tipo === 'aereo') ? 'block' : 'none';
-    document.getElementById('otroCampos').style.display = (tipo === 'otro') ? 'block' : 'none';
-  }
-
-  let contadorViajes = 0;
-  function agregarViaje() {
-    if (contadorViajes >= 10) return;
-    contadorViajes++;
-    const container = document.getElementById('viajesContainer');
-    const viajeDiv = document.createElement('div');
-    viajeDiv.innerHTML = `
-      <h4>Viaje ${contadorViajes}</h4>
-      <div class="form-group">
-        <label>Fecha</label>
-        <input type="date" name="fecha_${contadorViajes}">
-      </div>
-      <div class="form-group">
-        <label>Lugar</label>
-        <select name="lugar_${contadorViajes}">
-          <option value="Pasto">Pasto</option>
-          <option value="Popayan">Popayán</option>
-          <option value="Bogotá">Bogotá</option>
-          <option value="Cali">Cali</option>
-          <option value="El Tuno">El Tuno</option>
-          <option value="Purace">Puracé</option>
-          <option value="Medellin">Medellín</option>
-          <option value="Cartagena">Cartagena</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Agenda</label>
-        <textarea name="agenda_${contadorViajes}"></textarea>
-      </div>
-    `;
-    container.appendChild(viajeDiv);
-  }
-
-  function eliminarViaje() {
-    const container = document.getElementById('viajesContainer');
-    if (container.lastChild) {
-      container.removeChild(container.lastChild);
-      contadorViajes--;
-    }
-  }
-
-  function validarYExportarCSV() {
-    const form = document.getElementById('wizardForm');
-    const formData = new FormData(form);
-    let csvContent = "data:text/csv;charset=utf-8,";
-    const sectionHeaders = {
-      proyecto: 'Sección 1: Datos del solicitante',
-      fecha_1: 'Sección 2: Itinerario de viaje',
-      tipoDesplazamiento: 'Sección 3: Desplazamiento',
-      ubicacionAlojamiento: 'Sección 4: Alojamiento',
-      diasViaticos: 'Sección 5: Gastos de participación'
-    };
-
-    let headers = [], values = [], lastSection = '';
-    for (let [key, value] of formData.entries()) {
-      if (sectionHeaders[key] && sectionHeaders[key] !== lastSection) {
-        csvContent += `\n\"${sectionHeaders[key]}\"\n`;
-        lastSection = sectionHeaders[key];
-      }
-      headers.push(key);
-      values.push(`"${value}"`);
-    }
-    csvContent += headers.join(",") + "\n" + values.join(",");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "gestion_viajes.csv");
-    document.body.appendChild(link);
+    let blob = new Blob([csv.join("\n")], { type: 'text/csv;charset=utf-8;' });
+    let link = document.createElement("a");
+    link.setAttribute("href", URL.createObjectURL(blob));
+    link.setAttribute("download", "itinerario_viaje.csv");
     link.click();
-    document.body.removeChild(link);
   }
+
+  // Inicializa con una fila en cada tabla
+  addRow('transporte');
+  addRow('alojamiento');
+  addRow('viaticos');
 </script>
+
 </body>
 </html>
